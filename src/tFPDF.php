@@ -432,7 +432,7 @@ function GetStringWidth($s)
 	if ($this->unifontSubset) {
 		$unicode = $this->UTF8StringToArray($s);
 		foreach($unicode as $char) {
-			if (isset($cw[$char])) { $w += (ord($cw[2*$char])<<8) + ord($cw[2*$char+1]); }
+			if (isset($cw[$char])) { $w += (@ord($cw[2*$char])<<8) + @ord($cw[2*$char+1]); } // Quick and dirty "fix" for: Uninitialized string offset
 			else if($char>0 && $char<128 && isset($cw[chr($char)])) { $w += $cw[chr($char)]; }
 			else if(isset($this->CurrentFont['desc']['MissingWidth'])) { $w += $this->CurrentFont['desc']['MissingWidth']; }
 			else if(isset($this->CurrentFont['MissingWidth'])) { $w += $this->CurrentFont['MissingWidth']; }
@@ -1986,7 +1986,8 @@ function _putTTfontwidths(&$font, $maxUni) {
 		$interval = false;
 		$startcid = 1;
 	}
-	$cwlen = $maxUni + 1; 
+	//$cwlen = $maxUni + 1; 
+    $cwlen = 65535; // Fix for https://github.com/rev42/tfpdf/issues/7
 
 	// for each character
 	for ($cid=$startcid; $cid<$cwlen; $cid++) {
